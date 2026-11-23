@@ -5,7 +5,7 @@ local Visuals = {}
 local poses = {}
 local function locate(character)
     -- Search the full character: custom avatars may not parent joints where R15/R6 normally do.
-    local left, right, waist
+    local left, right, waist, leftElbow, rightElbow, leftWrist, rightWrist
     local found = {}
     for _, descendant in character:GetDescendants() do
         if descendant:IsA("Motor6D") then
@@ -13,7 +13,11 @@ local function locate(character)
             table.insert(found, descendant.Name .. "@" .. descendant.Parent.Name)
             if name == "leftshoulder" then left = descendant
             elseif name == "rightshoulder" then right = descendant
-            elseif name == "waist" then waist = descendant end
+            elseif name == "waist" then waist = descendant
+            elseif name == "leftelbow" then leftElbow = descendant
+            elseif name == "rightelbow" then rightElbow = descendant
+            elseif name == "leftwrist" then leftWrist = descendant
+            elseif name == "rightwrist" then rightWrist = descendant end
         end
     end
     if not left or not right then
@@ -21,7 +25,11 @@ local function locate(character)
     end
     return {
         left = left, right = right, waist = waist,
-        left0 = left.C0, right0 = right.C0, waist0 = waist and waist.C0
+        leftElbow = leftElbow, rightElbow = rightElbow,
+        leftWrist = leftWrist, rightWrist = rightWrist,
+        left0 = left.C0, right0 = right.C0, waist0 = waist and waist.C0,
+        leftElbow0 = leftElbow and leftElbow.C0, rightElbow0 = rightElbow and rightElbow.C0,
+        leftWrist0 = leftWrist and leftWrist.C0, rightWrist0 = rightWrist and rightWrist.C0
     }
 end
 local function state(player)
@@ -93,32 +101,44 @@ RunService.RenderStepped:Connect(function()
         local j = p.joints
         local hum = p.character:FindFirstChildOfClass("Humanoid")
         if not hum or hum.Health <= 0 then continue end
-        -- C0 offsets relative to original Roblox rig joints.
-        local left = CFrame.Angles(math.rad(35), math.rad(-12), math.rad(-12))
-        local right = CFrame.Angles(math.rad(35), math.rad(12), math.rad(12))
+        -- Guard is the default boxing stance. Bend elbows to bring fists toward chin.
+        -- Rotate shoulders forward moderately; punch extension is driven by elbow opening.
+        local left = CFrame.Angles(math.rad(46), math.rad(-8), math.rad(-16))
+        local right = CFrame.Angles(math.rad(46), math.rad(8), math.rad(16))
+        local leftElbow = CFrame.Angles(math.rad(-78), 0, 0)
+        local rightElbow = CFrame.Angles(math.rad(-78), 0, 0)
         local torso = CFrame.Angles(0, math.rad(-12), 0)
         if p.guard then
-            left = CFrame.Angles(math.rad(60), 0, math.rad(-12))
-            right = CFrame.Angles(math.rad(60), 0, math.rad(12))
+            left = CFrame.Angles(math.rad(57), math.rad(-8), math.rad(-12))
+            right = CFrame.Angles(math.rad(57), math.rad(8), math.rad(12))
+            leftElbow = CFrame.Angles(math.rad(-92), 0, 0)
+            rightElbow = CFrame.Angles(math.rad(-92), 0, 0)
         end
         if p.move then
             local elapsed = now - p.started
-            if elapsed >= 0.55 then
+            if elapsed >= 0.5 then
                 p.move = nil
             else
-                local k = pulse(elapsed, 0.55)
+                -- Fast extension, slightly slower recovery.
+                local t = math.clamp(elapsed / 0.5, 0, 1)
+                local k = t < 0.38 and math.sin((t / 0.38) * math.pi / 2)
+                    or math.cos(((t - 0.38) / 0.62) * math.pi / 2)
                 if p.move == "jab" then
-                    left = left * CFrame.Angles(math.rad(55*k), 0, math.rad(10*k))
-                    torso = torso * CFrame.Angles(0, math.rad(-16*k), 0)
+                    left = left * CFrame.Angles(math.rad(24*k), 0, math.rad(5*k))
+                    leftElbow = leftElbow * CFrame.Angles(math.rad(70*k), 0, 0)
+                    torso = torso * CFrame.Angles(0, math.rad(-10*k), 0)
                 elseif p.move == "cross" then
-                    right = right * CFrame.Angles(math.rad(55*k), 0, math.rad(-10*k))
-                    torso = torso * CFrame.Angles(0, math.rad(34*k), 0)
+                    right = right * CFrame.Angles(math.rad(28*k), 0, math.rad(-5*k))
+                    rightElbow = rightElbow * CFrame.Angles(math.rad(70*k), 0, 0)
+                    torso = torso * CFrame.Angles(0, math.rad(24*k), 0)
                 elseif p.move == "leadHook" then
-                    left = left * CFrame.Angles(math.rad(20*k), math.rad(-35*k), math.rad(-20*k))
-                    torso = torso * CFrame.Angles(0, math.rad(-28*k), 0)
+                    left = left * CFrame.Angles(math.rad(8*k), math.rad(-38*k), math.rad(-18*k))
+                    leftElbow = leftElbow * CFrame.Angles(math.rad(12*k), 0, 0)
+                    torso = torso * CFrame.Angles(0, math.rad(-24*k), 0)
                 elseif p.move == "rearUppercut" then
-                    right = right * CFrame.Angles(math.rad(35*k), math.rad(12*k), math.rad(15*k))
-                    torso = torso * CFrame.Angles(math.rad(-12*k), math.rad(22*k), 0)
+                    right = right * CFrame.Angles(math.rad(26*k), math.rad(12*k), math.rad(12*k))
+                    rightElbow = rightElbow * CFrame.Angles(math.rad(-12*k), 0, 0)
+                    torso = torso * CFrame.Angles(math.rad(-9*k), math.rad(18*k), 0)
                 end
             end
         end
@@ -128,6 +148,8 @@ RunService.RenderStepped:Connect(function()
         end
         j.left.C0 = j.left0 * left
         j.right.C0 = j.right0 * right
+        if j.leftElbow then j.leftElbow.C0 = j.leftElbow0 * leftElbow end
+        if j.rightElbow then j.rightElbow.C0 = j.rightElbow0 * rightElbow end
         if j.waist and j.waist0 then j.waist.C0 = j.waist0 * torso end
     end
 end)
