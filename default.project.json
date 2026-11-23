@@ -1,0 +1,39 @@
+{
+  "name": "Exit6GlovesUpGunsDown",
+  "tree": {
+    "$className": "DataModel",
+    "ReplicatedStorage": {
+      "$className": "ReplicatedStorage",
+      "CombatConfig": {
+        "$path": "src/shared/CombatConfig.luau"
+      },
+      "MoveDefinitions": {
+        "$path": "src/shared/MoveDefinitions.luau"
+      }
+    },
+    "ServerScriptService": {
+      "$className": "ServerScriptService",
+      "CombatService": {
+        "$path": "src/server/CombatService.server.luau"
+      },
+      "RigRepair": {
+        "$path": "src/server/RigRepair.server.luau"
+      }
+    },
+    "StarterPlayer": {
+      "$className": "StarterPlayer",
+      "StarterPlayerScripts": {
+        "$className": "StarterPlayerScripts",
+        "BoxingController": {
+          "$path": "src/client/BoxingController.client.luau"
+        },
+        "BoxingHUD": {
+          "$path": "src/client/BoxingHUD.client.luau"
+        },
+        "BoxingVisuals": {
+          "$path": "src/client/BoxingVisuals.luau"
+        }
+      }
+    }
+  }
+}

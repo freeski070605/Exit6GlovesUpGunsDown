@@ -1,0 +1,13 @@
+# Do not upload raw boxing footage, recordings, or generated media
+motion_lab/raw/
+motion_lab/processed/
+*.mp4
+*.mov
+*.avi
+*.fbx
+*.blend
+*.glb
+*.gltf
+__pycache__/
+.venv/
+.DS_Store
