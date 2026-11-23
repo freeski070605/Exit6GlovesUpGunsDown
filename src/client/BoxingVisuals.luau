@@ -94,12 +94,12 @@ RunService.RenderStepped:Connect(function()
         local hum = p.character:FindFirstChildOfClass("Humanoid")
         if not hum or hum.Health <= 0 then continue end
         -- C0 offsets relative to original Roblox rig joints.
-        local left = CFrame.Angles(math.rad(-65), math.rad(-12), math.rad(-20))
-        local right = CFrame.Angles(math.rad(-65), math.rad(12), math.rad(20))
+        local left = CFrame.Angles(math.rad(35), math.rad(-12), math.rad(-12))
+        local right = CFrame.Angles(math.rad(35), math.rad(12), math.rad(12))
         local torso = CFrame.Angles(0, math.rad(-12), 0)
         if p.guard then
-            left = CFrame.Angles(math.rad(-105), 0, math.rad(-14))
-            right = CFrame.Angles(math.rad(-105), 0, math.rad(14))
+            left = CFrame.Angles(math.rad(60), 0, math.rad(-12))
+            right = CFrame.Angles(math.rad(60), 0, math.rad(12))
         end
         if p.move then
             local elapsed = now - p.started
@@ -108,16 +108,16 @@ RunService.RenderStepped:Connect(function()
             else
                 local k = pulse(elapsed, 0.55)
                 if p.move == "jab" then
-                    left = left * CFrame.Angles(math.rad(-95*k), 0, math.rad(10*k))
+                    left = left * CFrame.Angles(math.rad(55*k), 0, math.rad(10*k))
                     torso = torso * CFrame.Angles(0, math.rad(-16*k), 0)
                 elseif p.move == "cross" then
-                    right = right * CFrame.Angles(math.rad(-105*k), 0, math.rad(-10*k))
+                    right = right * CFrame.Angles(math.rad(55*k), 0, math.rad(-10*k))
                     torso = torso * CFrame.Angles(0, math.rad(34*k), 0)
                 elseif p.move == "leadHook" then
-                    left = left * CFrame.Angles(math.rad(-25*k), math.rad(-85*k), math.rad(-35*k))
+                    left = left * CFrame.Angles(math.rad(20*k), math.rad(-35*k), math.rad(-20*k))
                     torso = torso * CFrame.Angles(0, math.rad(-28*k), 0)
                 elseif p.move == "rearUppercut" then
-                    right = right * CFrame.Angles(math.rad(65*k), math.rad(20*k), math.rad(25*k))
+                    right = right * CFrame.Angles(math.rad(35*k), math.rad(12*k), math.rad(15*k))
                     torso = torso * CFrame.Angles(math.rad(-12*k), math.rad(22*k), 0)
                 end
             end
