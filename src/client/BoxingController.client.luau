@@ -4,6 +4,7 @@ local ContextActionService = game:GetService("ContextActionService")
 local UserInputService = game:GetService("UserInputService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local player = Players.LocalPlayer
+local Visuals = require(script.Parent:WaitForChild("BoxingVisuals"))
 local remote = ReplicatedStorage:WaitForChild("CombatRequest")
 local lastPunch = 0
 local localBusyUntil = 0
@@ -19,12 +20,14 @@ local function punch(move: string)
     lastPunch = now
     localBusyUntil = now + punchCooldown
     remote:FireServer("punch", move)
-    -- TODO: immediate local animation via Animator:LoadAnimation on approved rig.
+    Visuals.Punch(player, move)
+
 end
 local function setGuard(enabled: boolean)
     if guard == enabled then return end
     guard = enabled
     remote:FireServer("guard", enabled)
+    Visuals.Guard(player, enabled)
 end
 local function guardAction(_, state)
     if state == Enum.UserInputState.Begin then setGuard(true)
@@ -39,6 +42,7 @@ local function slipAction(_, state, input)
     if state == Enum.UserInputState.Begin then
         local direction = (input and input.KeyCode == Enum.KeyCode.Q) and "left" or "right"
         remote:FireServer("slip", direction)
+        Visuals.Slip(player, direction)
     end
     return Enum.ContextActionResult.Sink
 end
@@ -75,6 +79,8 @@ UserInputService.InputChanged:Connect(function(input)
         punch(v.Y > 0 and "leadHook" or "rearUppercut")
     end
 end)
-remote.OnClientEvent:Connect(function(event, ...)
-    -- TODO: authoritative animation playback, hit feedback and HUD.
+remote.OnClientEvent:Connect(function(event, actor, detail)
+    if actor == player then return end
+    if event == "punch" then Visuals.Punch(actor, detail)
+    elseif event == "slip" then Visuals.Slip(actor, detail) end
 end)
