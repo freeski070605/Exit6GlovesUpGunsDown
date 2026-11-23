@@ -26,6 +26,9 @@
         },
         "BoxingHUD": {
           "$path": "src/client/BoxingHUD.client.luau"
+        },
+        "BoxingVisuals": {
+          "$path": "src/client/BoxingVisuals.luau"
         }
       }
     }
