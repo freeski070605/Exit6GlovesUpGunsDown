@@ -17,7 +17,7 @@ local function audit(character)
     print("[GUGD] SERVER RIG AUDIT", character.Name, "motors=", motors)
     if motors > 0 then return end
     local ok, err = pcall(function()
-        character:BuildRigFromAttachments()
+        humanoid:BuildRigFromAttachments()
     end)
     if not ok then
         warn("[GUGD] BuildRigFromAttachments failed:", err)
