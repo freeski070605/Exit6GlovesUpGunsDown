@@ -4,18 +4,29 @@
     "$className": "DataModel",
     "ReplicatedStorage": {
       "$className": "ReplicatedStorage",
-      "CombatConfig": {"$path": "src/shared/CombatConfig.luau"},
-      "MoveDefinitions": {"$path": "src/shared/MoveDefinitions.luau"}
+      "CombatConfig": {
+        "$path": "src/shared/CombatConfig.luau"
+      },
+      "MoveDefinitions": {
+        "$path": "src/shared/MoveDefinitions.luau"
+      }
     },
     "ServerScriptService": {
       "$className": "ServerScriptService",
-      "CombatService": {"$path": "src/server/CombatService.server.luau"}
+      "CombatService": {
+        "$path": "src/server/CombatService.server.luau"
+      }
     },
     "StarterPlayer": {
       "$className": "StarterPlayer",
       "StarterPlayerScripts": {
         "$className": "StarterPlayerScripts",
-        "BoxingController": {"$path": "src/client/BoxingController.client.luau"}
+        "BoxingController": {
+          "$path": "src/client/BoxingController.client.luau"
+        },
+        "BoxingHUD": {
+          "$path": "src/client/BoxingHUD.client.luau"
+        }
       }
     }
   }
