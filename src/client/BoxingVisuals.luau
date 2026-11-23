@@ -2,6 +2,7 @@
 local Players = game:GetService("Players")
 local Visuals = {}
 local STANCE_ID = "rbxassetid://101022751659368"
+local JAB_ID = "rbxassetid://80156173812079"
 local tracks = {}
 
 local function ensureStance(player)
@@ -23,7 +24,7 @@ local function ensureStance(player)
     end
     track.Looped = true
     track.Priority = Enum.AnimationPriority.Action
-    tracks[player] = {character = character, track = track}
+    tracks[player] = {character = character, track = track, jab = nil}
     track:Play(0.2)
     print("[GUGD] Boxing stance playing for", player.Name)
     return track
@@ -31,8 +32,35 @@ end
 
 function Visuals.Punch(player, move)
     ensureStance(player)
+    if move ~= "jab" then
+        if player == Players.LocalPlayer then
+            player:SetAttribute("BoxingVisualDebug", "ANIMATION PENDING: " .. tostring(move))
+        end
+        return
+    end
+    local entry = tracks[player]
+    if not entry then return end
+    if not entry.jab then
+        local humanoid = entry.character:FindFirstChildOfClass("Humanoid")
+        local animator = humanoid and humanoid:FindFirstChildOfClass("Animator")
+        if not animator then return end
+        local animation = Instance.new("Animation")
+        animation.AnimationId = JAB_ID
+        local ok, jabTrack = pcall(function() return animator:LoadAnimation(animation) end)
+        animation:Destroy()
+        if not ok then
+            warn("[GUGD] Failed to load jab:", jabTrack)
+            return
+        end
+        jabTrack.Priority = Enum.AnimationPriority.Action2
+        jabTrack.Looped = false
+        entry.jab = jabTrack
+    end
+    -- Keep the looping stance underneath; the jab temporarily overrides its keyed joints.
+    entry.jab:Stop(0)
+    entry.jab:Play(0.06, 1, 1)
     if player == Players.LocalPlayer then
-        player:SetAttribute("BoxingVisualDebug", "STANCE ACTIVE / PUNCH ANIMATION PENDING: " .. tostring(move))
+        player:SetAttribute("BoxingVisualDebug", "JAB ANIMATION PLAYING")
     end
 end
 
