@@ -4,23 +4,46 @@ local RunService = game:GetService("RunService")
 local Visuals = {}
 local poses = {}
 local function locate(character)
-    local upper = character:FindFirstChild("UpperTorso") or character:FindFirstChild("Torso")
-    if not upper then return nil end
-    local left = upper:FindFirstChild("LeftShoulder") or upper:FindFirstChild("Left Shoulder")
-    local right = upper:FindFirstChild("RightShoulder") or upper:FindFirstChild("Right Shoulder")
-    if not left or not right then return nil end
-    local lower = character:FindFirstChild("LowerTorso")
-    return {left = left, right = right, waist = lower and lower:FindFirstChild("Waist"), left0 = left.C0, right0 = right.C0, waist0 = lower and lower:FindFirstChild("Waist") and lower.Waist.C0}
+    -- Search the full character: custom avatars may not parent joints where R15/R6 normally do.
+    local left, right, waist
+    local found = {}
+    for _, descendant in character:GetDescendants() do
+        if descendant:IsA("Motor6D") then
+            local name = descendant.Name:lower():gsub("[%s_%-]", "")
+            table.insert(found, descendant.Name .. "@" .. descendant.Parent.Name)
+            if name == "leftshoulder" then left = descendant
+            elseif name == "rightshoulder" then right = descendant
+            elseif name == "waist" then waist = descendant end
+        end
+    end
+    if not left or not right then
+        return nil, table.concat(found, ", ")
+    end
+    return {
+        left = left, right = right, waist = waist,
+        left0 = left.C0, right0 = right.C0, waist0 = waist and waist.C0
+    }
 end
 local function state(player)
     local character = player.Character
     if not character then return nil end
     local p = poses[player]
     if not p or p.character ~= character then
-        p = {character = character, joints = nil, move = nil, started = 0, guard = false, slip = nil, slipStarted = 0}
+        p = {character = character, joints = nil, lastRigLog = 0, move = nil, started = 0, guard = false, slip = nil, slipStarted = 0}
         poses[player] = p
     end
-    if not p.joints then p.joints = locate(character) end
+    if not p.joints then
+        local found, diagnostic = locate(character)
+        p.joints = found
+        if not found and player == Players.LocalPlayer and os.clock() - p.lastRigLog > 5 then
+            p.lastRigLog = os.clock()
+            warn("[GUGD] Shoulder joints missing; Motor6Ds:", diagnostic)
+            player:SetAttribute("BoxingRigDiagnostic", diagnostic ~= "" and diagnostic or "NO MOTOR6D JOINTS")
+        elseif found and player == Players.LocalPlayer then
+            print("[GUGD] Shoulder joints found:", found.left:GetFullName(), found.right:GetFullName())
+            player:SetAttribute("BoxingRigDiagnostic", "RIG FOUND")
+        end
+    end
     return p
 end
 function Visuals.Punch(player, move)
