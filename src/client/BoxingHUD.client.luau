@@ -59,6 +59,10 @@ local function updateStamina()
     local n = player:GetAttribute("BoxingStamina")
     stamina.Text = "STAMINA: " .. (typeof(n) == "number" and (tostring(n) .. " / 100") or "WAITING FOR SERVER")
 end
+player:GetAttributeChangedSignal("BoxingVisualDebug"):Connect(function()
+    local v = player:GetAttribute("BoxingVisualDebug")
+    if v then status.Text = "VISUAL: " .. tostring(v) end
+end)
 player:GetAttributeChangedSignal("BoxingStamina"):Connect(updateStamina)
 updateStamina()
 UserInputService.InputBegan:Connect(function(input, processed)
