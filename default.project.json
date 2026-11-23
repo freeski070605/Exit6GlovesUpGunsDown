@@ -15,6 +15,9 @@
       "$className": "ServerScriptService",
       "CombatService": {
         "$path": "src/server/CombatService.server.luau"
+      },
+      "RigRepair": {
+        "$path": "src/server/RigRepair.server.luau"
       }
     },
     "StarterPlayer": {
