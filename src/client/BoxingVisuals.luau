@@ -37,6 +37,23 @@ local function state(player)
         p.joints = found
         if not found and player == Players.LocalPlayer and os.clock() - p.lastRigLog > 5 then
             p.lastRigLog = os.clock()
+            local hum = character:FindFirstChildOfClass("Humanoid")
+            local parts = {}
+            local counts = {BasePart = 0, Bone = 0, Weld = 0, Motor6D = 0, Animator = 0}
+            for _, item in character:GetDescendants() do
+                for className in counts do
+                    if item:IsA(className) then counts[className] += 1 end
+                end
+                if item:IsA("BasePart") and #parts < 30 then
+                    table.insert(parts, item.Name .. "(" .. item.ClassName .. ")")
+                end
+            end
+            warn("[GUGD] RIG AUDIT rigType=", hum and hum.RigType.Name or "NO HUMANOID",
+                "character=", character:GetFullName(),
+                "parts=", counts.BasePart, "bones=", counts.Bone,
+                "welds=", counts.Weld, "motors=", counts.Motor6D,
+                "animators=", counts.Animator)
+            warn("[GUGD] RIG PART NAMES:", table.concat(parts, ", "))
             warn("[GUGD] Shoulder joints missing; Motor6Ds:", diagnostic)
             player:SetAttribute("BoxingRigDiagnostic", diagnostic ~= "" and diagnostic or "NO MOTOR6D JOINTS")
         elseif found and player == Players.LocalPlayer then
